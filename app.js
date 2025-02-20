@@ -28,7 +28,7 @@ app.get('/api/tareas', (req, res)=>{
 		rows.sort((a, b)=>{
 			if(!a.fecha_limite) return 1;
 			if(!b.fecha_limite) return -1;
-			return new Date(a.fecha_limite - b.fecha_limite);
+			return new Date(a.fecha_limite) - new Date(b.fecha_limite);
 		});
 		
 		res.json(rows);
