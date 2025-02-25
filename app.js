@@ -60,7 +60,28 @@ app.get('/api/tareas', (req, res)=> {
 	});
 });
 
-// PUT
+// PUT /api/tareas/:id
+app.put('/api/tareas/:id', (req, res)=> {
+	const id = req.params.id;
+	const { titulo, descripcion, fecha_limite } = req.body;
+	db.run(`UPDATE tareas SET 
+		titulo = COALESCE(?, titulo),
+		descripcion = COALESCE(?, descripcion),
+		fecha_limite = COALESCE(?, fecha_limite)
+		WHERE id = ?`, [titulo, descripcion, fecha_limite, id],
+		function(err) {
+			if (err) {
+				return res.status(500).json({ error: err.message });
+			}
+			if (this.changes === 0) {
+				return res.status(404).json({ message: 
+				"Tarea no encontrada"});
+			}
+			res.json({ message: "Tarea actualizada con éxito", id: id });
+			}
+	);
+});
+
 
 // DELETE /api/tareas/:id
 
@@ -78,6 +99,7 @@ app.delete('/api/tareas/:id', (req, res)=> {
 		}
 	});
 });
+
 
 app.listen(port, ()=>{
 	console.log(`Escuchando en el puerto: ${port}`);
