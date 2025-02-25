@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const db = require('./database');
 const port = 3000;
+const bcrypt = require('bcrypt');
 const getTareasQuery = `SELECT * FROM tareas
 					 WHERE completado = 0
 					 ORDER BY id ASC` 
@@ -18,7 +19,7 @@ const postTareasQuery = `INSERT INTO tareas (
 app.use(express.json());
 
 
-// POT /api/tareas
+// POST /api/tareas
 app.post('/api/tareas', (req, res)=>{
 	const { titulo, descripcion, fecha_limite, completado  } = req.body;
 	
@@ -98,6 +99,27 @@ app.delete('/api/tareas/:id', (req, res)=> {
 			res.status(404).json({ error: "Tarea no encontrada" });
 		}
 	});
+});
+
+// POST /api/registro
+app.post('/api/registro', (req, res) => {
+	const { usuario, password, email } = req.body;
+	try {
+		const hashedPassword = bcrypt.hashSync(password, 10); 
+	} catch(error) {
+		console.error("Error al hashear el password: ", error);
+	}
+	
+	db.run(`INSERT INTO users (usuario, password, email) 
+	VALUES (?, ?, ?)`, [usuario, password, email],
+		function (err) {
+			if (err) {
+					return res.status(400).json({ error: err.message });
+			}
+			res.json({ id: this.lastID, message: `Usuario registrado con éxito` });
+		}
+
+	);
 });
 
 
